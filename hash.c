@@ -1,5 +1,4 @@
 #include "hash.h"
-#define n_notas 4
 
 char *readline(){
 
@@ -26,6 +25,27 @@ char *readline(){
 
 }
 
+
+ALUNO *cria_aluno(){
+
+    ALUNO *aluno = (ALUNO*)malloc(sizeof(ALUNO));
+    aluno -> prox = NULL;
+    return aluno;
+
+}
+
+HT *cria_ht(int tamanho){
+
+    HT* ht = (HT*)malloc(sizeof(HT));
+    ht -> tamanho = tamanho;
+    ht -> alunos = (ALUNO **)malloc(tamanho * sizeof(ALUNO*));
+
+    for(int i = 0; i < tamanho; i++) ht -> alunos[i] = NULL;
+
+    return ht;
+
+}
+
 unsigned long int cria_hash(char *str){
 
     unsigned int low = 1, high = 0;
@@ -39,204 +59,152 @@ unsigned long int cria_hash(char *str){
 
 }
 
-ALUNO *cria_aluno(){
+void insere_ht(HT *ht, ALUNO *aluno){
 
-    ALUNO *aluno = (ALUNO *)malloc(sizeof(ALUNO));
-    return aluno;
+    //o erro está nessa funcao, certeza
+    unsigned long int index = (cria_hash(aluno -> nusp) % (ht -> tamanho));
 
-}
-
-HASHTABLE* cria_table(int tamanho){
-
-
-    HASHTABLE* ht = (HASHTABLE*) malloc(sizeof(HASHTABLE));
-    ht -> tamanho = tamanho;
-    ht -> qtd = 0;
-    ht -> alunos = (ALUNO **)calloc(tamanho, sizeof(ALUNO*));
-
-    //Setar todos os ponteiros de ALUNO para nulo será extremamente útil para futuras
-    //comparações
-    for(int i = 0; i < ht -> tamanho; i++) ht -> alunos[i] = NULL;
-    
-    return ht;
-
-}
-
-void table_insere(HASHTABLE *ht, ALUNO *aluno, char *nusp){
-
-    unsigned long int index = cria_hash(nusp) % (ht -> tamanho);
-    
     ALUNO *aluno_atual = ht -> alunos[index];
 
-
-    //Caso 1: Não há aluno registrado nesse index
+    //Caso 1: Sem registros prévios nesse index
     if(aluno_atual == NULL){
 
-        if(ht -> qtd == ht -> tamanho){
-            //adicionar um free aluno depois
-            return;
-        }
-
         ht -> alunos[index] = aluno;
-        ht -> qtd ++;
-        printf("Cadastro efetuado com sucesso\n");
+        if(ht -> alunos[index] != NULL) printf("Cadastro efetuado com sucesso\n");
+        printf("%s", ht -> alunos[index] -> nusp);
+        if(ht -> alunos[index] != NULL) printf("ue porra\n");
         return;
 
     }
 
-    //Caso 2: Já existe um aluno registrado nesse index, mas o nusp é o mesmo
-    //(Portanto, sem colisão)
-    if(strcmp(aluno_atual -> nusp, nusp) == 0){
-        printf("NUSP ja cadastrado\n");
-        return;
-    }
+    //Caso 2: nusp são iguais
+    if(strcmp(ht -> alunos[index] -> nusp, aluno_atual -> nusp) == 0) printf("NUSP ja cadastrado\n");
 
+    //Caso 3: Colisão (É preciso lidar usando listas)
+    else{
+        ALUNO *p = aluno_atual;
+        ALUNO *aux = aluno -> prox;
 
-    //Caso 3: Já existe um aluno diferente registrado nesse index (colisão)
-
-    //colisao (adicionar aqui)
-
-
-
-
-
-
-
-}
-
-
-
-void leitura_cadastro(HASHTABLE *ht, int n){
-
-    for(int i = 0; i < n; i++){
-
-        ALUNO *aluno = cria_aluno();
-        char *nusp = readline();
-        char *senha = readline();
-        for(int j = 0; j < 4; j++){
-            scanf("%lf", &aluno -> notas[j]);
+        while(p != NULL){
+            
+            p = p -> prox;
         }
 
-        unsigned long int senha_ht = cria_hash(senha);
-        aluno -> nusp = nusp;
-        aluno -> senha = senha_ht;
-        
-        
-
-        table_insere(ht, aluno, nusp);
-        
-
-
-
+        p = aux;
     }
 
 
 
 }
 
-LISTA** cria_lista_colisoes(HASHTABLE *ht){
+void leitura_cadastro(HT *ht, int n){
 
-    LISTA** colisoes = (LISTA**) calloc(ht -> tamanho, sizeof(LISTA*));
+    
+    for(int i = 0; i < n; i++){
+        
+        ALUNO *aluno_atual = cria_aluno();
+        char *nusp, *senha;
+        nusp = readline();
+        senha = readline();
+        unsigned long int senha_hash = cria_hash(senha);
 
-    for(int i = 0; i < ht -> tamanho; i++) colisoes[i] = NULL;
+        aluno_atual -> nusp = nusp;
+        aluno_atual -> senha = senha_hash;
 
-    return colisoes;
+        printf("%s\n", aluno_atual -> nusp);
+
+
+        for(int j = 0; j < 4; j++){
+
+            scanf("%lf", &aluno_atual -> notas[j]);
+
+        }
+
+        insere_ht(ht, aluno_atual);
+        
+    }
+
+
 
 }
 
+void busca_ht(HT *ht, char *nusp, char *senha){
+
+    unsigned long int index = (cria_hash(nusp) % (ht -> tamanho));
+    unsigned long int senha_hs = cria_hash(senha);
+
+    ALUNO *aluno_atual = ht -> alunos[index];
+    //o problema esta aqui, certeza!!!!!!
+    if(aluno_atual != NULL) printf("Achei\n");
 
 
+    
+
+    //NUSP existe e ocupa o "topo" da lista
+    if(strcmp(aluno_atual -> nusp, nusp) == 0){
+        
+        if(senha_hs == aluno_atual -> senha){
+            
+            printf("P1:%.1lf, ", aluno_atual -> notas[0]);
+            printf("P2:%.1lf, ", aluno_atual -> notas[1]);
+            printf("T1:%.1lf, ", aluno_atual -> notas[2]);
+            printf("T2:%.1lf\n", aluno_atual -> notas[3]);
+
+        }
+
+        else printf("Senha incorreta\n");
+
+        
+    
+
+    //     else printf("Senha incorreta para o NUSP digitado\n");
+
+   }
+
+    // //NUSP existe mas não é o do "topo" da lista (colisão)
+
+    
+    // aluno_buscado = aluno_buscado -> prox;
+    // while(aluno_buscado != NULL){
+        
+        
+    //     if(strcmp(aluno_buscado -> nusp, nusp) == 0){
+
+    //         if(senha_hs == aluno_buscado -> senha){
+                
+    //             printf("P1:%1.lf, ", aluno_buscado -> notas[0]);
+    //             printf("P2:%1.lf, ", aluno_buscado -> notas[1]);
+    //             printf("T1:%1.lf, ", aluno_buscado -> notas[2]);
+    //             printf("T2:%1.lf\n", aluno_buscado -> notas[3]);
+
+    //         }
+
+    //         else printf("Senha incorreta para o NUSP digitado\n");
+
+    //     }
+    //     aluno_buscado = aluno_buscado -> prox;
+        
+    // }
+
+    // //NUSP não existe
+    // if(aluno_buscado == NULL){
+
+    //     printf("NUSP invalido\n");
 
 
-void printa(ALUNO **alunos, int n){
+    // }
 
-   
 }
 
+void busca(HT *ht, int n_senhas){
 
+    char *nusp;
+    char *senha;
 
+    for(int i = 0; i < n_senhas; i++){
+        nusp = readline();
+        senha = readline();
 
-
-// LISTA *cria_lista(){
-
-//     LISTA* l = (LISTA *)malloc(sizeof(LISTA));
-//     return l;
-
-// }
-
-// LISTA* insere_lista(LISTA *l, ALUNO *aluno){
-
-//     //Caso 1: Lista vazia
-//     if(!l){
-        
-//         LISTA* head = cria_lista();
-//         head -> aluno = aluno;
-//         head -> prox = NULL;
-//         l = head;
-//         return l;
-
-
-//     }
-
-//     //Caso 2: Inserção no começo
-//     if(l -> prox = NULL){
-        
-//         LISTA *bloco = cria_lista();
-//         bloco -> aluno = aluno;
-//         bloco -> prox = NULL;
-//         l -> prox = bloco;
-//         return l;
-
-//     }
-
-//     //Caso 3: Inserção no fim
-//     LISTA* aux = l;
-//     while(aux -> prox != NULL) aux = aux -> prox;
-
-//     LISTA *bloco = cria_aluno();
-//     bloco -> aluno = aluno;
-//     bloco -> prox = NULL;
-//     aux -> prox = bloco;
-//     return l;
-    
-
-// }
-
-// ALUNO *pop_lista(LISTA *l){
-
-//     if(l -> prox == NULL) return NULL;
-
-//     LISTA *bloco = l -> prox;
-//     LISTA *aux = l;
-
-//     aux -> prox = NULL;
-//     l = bloco;
-
-//     ALUNO *aluno = NULL;
-//     memcpy(aux -> aluno, aluno, sizeof(ALUNO));
-    
-//     free(aux -> aluno -> nusp);
-//     free(aux -> aluno -> senha);
-//     free(aux -> aluno);
-//     free(aux);
-
-//     return aluno;
-
-
-// }
-
-// void destroi_lista(LISTA *l){
-    
-//     LISTA *aux; 
-//     while(l != NULL){
-        
-//         aux = l;
-//         l = l -> prox;
-//         free(aux -> aluno -> nusp);
-//         free(aux -> aluno -> senha);
-//         free(aux -> aluno);
-//         free(aux);
-
-//     }
-
-// }
+        busca_ht(ht, nusp, senha);
+    }
+}
