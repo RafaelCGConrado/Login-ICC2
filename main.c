@@ -1,36 +1,29 @@
 #include "hash.h"
-#define tam_ht 100
-
+#define tam 100
 
 int main(){
 
-   
-
-    int n, n_login;
+    int n;
     scanf("%d", &n);
 
+    //Leitura
+    HT *ht = cria_ht(tam);
+    leitura_cadastro(ht, n);
 
-    HASHTABLE *hs = cria_table(tam_ht);
+    //Pesquisa
+    // int n_buscas;
+    // scanf("%d", &n_buscas);
 
-    //Leitura da entrada, conversões e inserções na Hash Table
-    leitura_cadastro(hs, n);
+    
+    
+    int n_senhas;
+    scanf("%d", &n_senhas);
 
-    for(int i = 0; i < tam_ht; i++){
-        if(hs -> alunos[i] != NULL){
-            printf("%s\n", hs -> alunos[i] -> nusp);
-            for(int j = 0; j < 4; j++) printf("%lf ", hs -> alunos[i] -> notas[j]);
-            printf("\n");
-            
-        }
-    }
-
-
-
-
-    //pesquisa e retorno
-
+    busca(ht, n_senhas);
 
    
+    
 
     return 0;
+
 }
