@@ -2,52 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 typedef struct aluno ALUNO;
-typedef struct hashtable HASHTABLE;
-typedef struct lista LISTA;
-
+typedef struct hashtable HT;
 
 struct aluno{
 
     char *nusp;
     unsigned long int senha;
     double notas[4];
+    ALUNO *prox;
 
 };
 
 struct hashtable{
 
-    ALUNO** alunos;
+    ALUNO **alunos;
     int tamanho;
-    int qtd;
-    
 
 };
 
-//Função utilizada para ler uma linha inteira da STDIN (Em particular, NUSP e senha)
+//Lê a linha até encontrar um espaço (Fundamental para a leitura de NUSP e senha)
 char *readline();
 
-//Cria o hash correspondente de acordo com o nusp ou senha
+//Cria o item ALUNO
+ALUNO *cria_aluno();
+
+//Cria a HashTable
+HT *cria_ht(int tamanho);
+
+//Cria a hash que será utilizada no index e nas senhas
 unsigned long int cria_hash(char *str);
 
+//Recebe as entradas e cadastra na hashtable
+void leitura_cadastro(HT *ht, int n);
 
-//Cria a hashtable que será utilizada
-HASHTABLE* cria_table(int tamanho);
+void busca_ht(HT *ht, char *nusp, char *senha);
 
-//Lê as entradas, faz as conversões e cadastra os alunos na
-//HashTable fornecida
-void leitura_cadastro(HASHTABLE *hs, int n);
-
-
-
-
-//Funções de Lista Encadeada
-
-LISTA *cria_lista();
-
-LISTA *insere_lista(LISTA *l, ALUNO *aluno);
-
-ALUNO *pop_lista(LISTA *l);
-
-void destroi_lista(LISTA *lista);
+void busca(HT *ht, int n_senhas);
