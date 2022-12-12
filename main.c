@@ -10,19 +10,11 @@ int main(){
     HT *ht = cria_ht(tam);
     leitura_cadastro(ht, n);
 
-    //Pesquisa
-    // int n_buscas;
-    // scanf("%d", &n_buscas);
-
-    
-    
     int n_senhas;
     scanf("%d", &n_senhas);
 
+    //Buscas
     busca(ht, n_senhas);
-
-   
-    
 
     return 0;
 
